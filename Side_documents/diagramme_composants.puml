@@ -1,0 +1,27 @@
+@startuml composants
+
+package "Partie" {
+
+}
+
+package "Grille"{
+
+} 
+package "Tuiles"{
+
+}
+
+package "Pièces"{
+
+}
+
+package "Combat" {
+
+}
+
+Partie --> Grille
+Grille --> Tuiles
+Grille --> Pièces
+Pièces --> Combat
+
+@enduml
