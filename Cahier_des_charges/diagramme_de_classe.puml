@@ -1,1 +1,27 @@
+@startuml class 
 
+abstract Pieces {
+    - print : bool 
+    - name : string 
+}
+
+class Flag {
+
+}
+
+class Bomb {
+
+}
+
+abstract Units {
+    - valeur
+    + deplace() : void
+}
+
+class Combat {
+
+}
+
+
+
+@enduml
