@@ -1,0 +1,224 @@
+
+@startuml
+title Diagramme de Séquence - Jeu Stratego
+
+autonumber
+
+' =========================
+' STYLE GENERAL
+' =========================
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 25
+skinparam BoxPadding 10
+skinparam LifeLineBorderColor #41678C
+skinparam LifeLineBackgroundColor #EAF3FF
+skinparam ParticipantBorderColor #285580
+skinparam ParticipantBackgroundColor #DCEBFA
+skinparam ActorBorderColor #285580
+skinparam ArrowColor #34495E
+skinparam ArrowFontColor #222222
+skinparam SequenceGroupBorderColor #5683AE
+skinparam SequenceGroupBackgroundColor #F5F9FF
+skinparam NoteBackgroundColor #FFF4CC
+skinparam NoteBorderColor #C5A642
+
+hide footbox
+
+' =========================
+' ACTEURS ET OBJETS
+' =========================
+
+actor "Système / Main" as Main
+
+participant "jeux : Jeux" as Jeux
+participant "j1 : Joueur" as J1
+participant "j2 : Joueur" as J2
+participant "grid : Grid" as Grid
+participant "cell : Cell" as Cell
+participant "unit : Unit" as Unit
+participant "timer : Timer" as Timer
+
+' =========================
+' 1. INITIALISATION
+' =========================
+
+== 1. Phase d'initialisation ==
+
+Main -> Jeux ++ : <<create>>
+
+Jeux -> J1 ++ : <<create>>
+Jeux -> J2 ++ : <<create>>
+Jeux -> Grid ++ : <<create>>
+
+Grid -> Cell ++ : <<create>> [10 x 10]
+return Grille créée
+
+return Grid créée
+
+Jeux -> J1 : initialize(grid)
+activate J1
+
+J1 -> Grid : getGrid() : List<Cell>
+Grid --> J1 : liste des cellules
+
+loop Pour chaque pièce du joueur J1
+    J1 -> Unit ++ : <<create>>(Color.ROUGE, rank)
+    return unit
+
+    J1 -> Cell : setUnit(unit)
+    J1 -> Cell : setOccupied(true)
+end
+
+deactivate J1
+
+Jeux -> J2 : initialize(grid)
+activate J2
+
+note right of J2
+  Même processus que J1
+  avec Color.BLEU
+end note
+
+loop Pour chaque pièce du joueur J2
+    J2 -> Unit ++ : <<create>>(Color.BLEU, rank)
+    return unit
+
+    J2 -> Cell : setUnit(unit)
+    J2 -> Cell : setOccupied(true)
+end
+
+deactivate J2
+
+' =========================
+' TIRAGE AU SORT
+' =========================
+
+Jeux -> Jeux : tirage_au_sol() : int
+Jeux <-- Jeux : result
+
+alt result == 2 (J2 commence)
+    Jeux -> J1 : setCouleur(Color.BLEU)
+    Jeux -> J2 : setCouleur(Color.ROUGE)
+else result == 1 (J1 commence)
+    Jeux -> J1 : setCouleur(Color.ROUGE)
+    Jeux -> J2 : setCouleur(Color.BLEU)
+end
+
+' =========================
+' INITIALISATION DES TEMPS
+' =========================
+
+Jeux -> Timer ++ : <<create>>
+return timer
+
+Jeux -> J1 : init_timer(time)
+Jeux -> J2 : init_timer(time)
+
+' =========================
+' 2. BOUCLE PRINCIPALE
+' =========================
+
+== 2. Boucle principale de jeu ==
+
+loop Tant que la partie n'est pas terminée
+
+    note over Jeux, Timer
+      Conditions de continuation :
+      !j1.lost_allMobile_players()
+      && !j2.lost_allMobile_players()
+      && j1.get_remaining_time() != 0
+      && j2.get_remaining_time() != 0
+    end note
+
+    ' -------------------------
+    ' Tour du joueur courant
+    ' -------------------------
+
+    Jeux -> J1 : play()
+    activate J1
+
+    Jeux -> Timer : start_timer()
+
+    ' -------------------------
+    ' Recherche de la cellule
+    ' -------------------------
+
+    J1 -> Grid : getCell(x, y) : Cell
+    Grid --> J1 : cellule cible
+
+    J1 -> Cell : getUnit() : Unit
+    activate Cell
+    Cell --> J1 : cible
+    deactivate Cell
+
+    ' -------------------------
+    ' Déplacement ou attaque
+    ' -------------------------
+
+    alt cible == null (Case vide)
+
+        J1 -> Cell : setUnit(unit)
+        J1 -> Cell : setOccupied(true)
+
+        J1 -> Jeux : combatDetecte = false
+
+    else cible.getColor() != j1.getColor() (Pièce ennemie)
+
+        J1 -> Jeux : combatDetecte = true
+
+    else Pièce alliée
+
+        J1 -> Jeux : déplacement refusé
+
+    end
+
+    deactivate J1
+
+    ' -------------------------
+    ' Gestion du combat
+    ' -------------------------
+
+    opt combatDetecte == true
+
+        Jeux -> J1 : fight(x, y, unit) : bool
+        activate J1
+
+        J1 --> Jeux : victoire
+
+        deactivate J1
+
+        opt victoire == false
+
+            Jeux -> J1 : retire_points()
+            
+        end
+
+    end
+
+    ' -------------------------
+    ' Fin du tour
+    ' -------------------------
+
+    Jeux -> Timer : stop_timer()
+
+    Jeux -> Jeux : changerJoueurCourant()
+
+end
+
+' =========================
+' 3. FIN DE PARTIE
+' =========================
+
+== 3. Fin de partie ==
+
+Jeux -> Jeux : printWinner()
+
+Jeux --> Main : Résultat de la partie
+
+deactivate Jeux
+
+@enduml
