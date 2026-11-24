@@ -1,8 +1,14 @@
 @startuml class 
+
 package "STRATEGO"{
+
+package "Model"{
+
 abstract Units {
     - valeur : Grade
     + deplace(cell : Cell) : void
+    + substitute(unit1 : Units, unit2 : Units) : void
+    + destroyUnit(unit : Units) : void
 }
 
 enum Grade {
@@ -15,26 +21,28 @@ enum Grade {
     SERGENT = 4;
     DEMINEUR = 3;
     ECLAIREUR = 2; 
-    ESPION = 1; 
+    ESPIONNE = 1; 
     FLAG = 0;
     BOMB = 11;
 
-    - code : int
+    - value : int
     + Grade(code)
-    + getCode() : code
-    + {static} fromCode(code) : Grade
+    + getValue() : value
+    + {static} fromValue(value) : Grade
 }
 
 class Fight {
     - fighter1 : Units;
     - fighter2 : Units;
-    + fighting(fighter1, fighter2) : Units 
+    + fighting(fighter1, fighter2) : Units
+    + revealFace(unit : Units) : void
 }
 
 abstract Player {
     - pieces[40] : Units
+    - score : int
     + giveUp() : void
-    + jouer(piece : Units, cell : Cell)
+    + attack(piece : Units, cell : Cell)
 }
 
 class RealPlayer{
@@ -79,6 +87,10 @@ class Grid {
     + Grid(grid[][])
     + update() : void
 }
+}
+
+package view{}
+package controller{}
 }
 
 Units <-- Fight
