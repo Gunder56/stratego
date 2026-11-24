@@ -1,27 +1,82 @@
 @startuml class 
 
 abstract Pieces {
-    - print : bool 
+    - print : boolean
     - name : string 
 }
 
-class Flag {
-
-}
-
-class Bomb {
-
-}
-
 abstract Units {
-    - valeur
+    - valeur : Grade
     + deplace() : void
 }
 
-class Combat {
-
+enum Grade {
+    MARECHAL = 10;
+    GENERAL = 9;
+    COLONEL = 8;
+    COMMANDANT = 7;
+    CAPITAINE = 6;
+    LIEUTENANT = 5;
+    SERGENT = 4;
+    DEMINEUR = 3;
+    ECLAIREUR = 2; 
+    ESPION = 1; 
+    FLAG;
+    BOMB;
 }
 
 
+class Fight {
+
+}
+
+class Player {
+
+}
+
+class Game {
+    - PlayerList[] : Player;
+    + initPlateau(player : Player) : void;
+}
+
+interface Mode {
+
+}
+
+class BeginnerMode {
+
+}
+
+class ClassicMode {
+
+}
+
+class Timer {
+
+}
+
+class Cell {
+    + estLibre(): boolean 
+}
+
+class Grid {
+    - longueur : int
+    - largeur : int 
+    + Grid(longueur : int, largeur : int)
+    + update() : void
+}
+
+Units --> Pieces
+Fight <-- Pieces
+
+Game <.. Timer
+Game --> Mode
+Game --o Player
+BeginnerMode .up.|> Mode  
+ClassicMode .up.|> Mode
+
+Grid -- Cell
+
+Grade --|> Units
 
 @enduml
