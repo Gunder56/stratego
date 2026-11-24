@@ -2,7 +2,7 @@
 package "STRATEGO"{
 abstract Units {
     - valeur : Grade
-    + deplace() : void
+    + deplace(cell : Cell) : void
 }
 
 enum Grade {
@@ -20,8 +20,9 @@ enum Grade {
     BOMB = 11;
 
     - code : int
+    + Grade(code)
     + getCode() : code
-    + 
+    + {static} fromCode(code) : Grade
 }
 
 class Fight {
@@ -30,13 +31,25 @@ class Fight {
     + fighting(fighter1, fighter2) : Units 
 }
 
-class Player {
+abstract Player {
+    - pieces[40] : Units
+    + giveUp() : void
+    + jouer(piece : Units, cell : Cell)
+}
+
+class RealPlayer{
+
+}
+
+class AIPlayer{
 
 }
 
 class Game {
     - PlayerList[] : Player
     + initPlateau(player : Player) : void
+    + play(mode : Mode) : void 
+
 }
 
 interface Mode {
@@ -52,10 +65,10 @@ class ClassicMode {
 }
 
 class Timer {
-
 }
 
 class Cell {
+    - storageUnits : Units
     + estLibre(): boolean 
 }
 
@@ -64,13 +77,15 @@ class Grid {
     + Grid()
     + Grid(longueur : int, largeur : int)
     + Grid(grid[][])
+    + update() : void
 }
 }
 
 Units <-- Fight
 
+Units <.. Cell
 Game <.. Timer
-Game --> Mode
+Game ..> Mode
 Game --o Player
 BeginnerMode .up.|> Mode  
 ClassicMode .up.|> Mode
@@ -78,5 +93,10 @@ ClassicMode .up.|> Mode
 Grid -- Cell
 
 Grade --|> Units
+
+Player --* Units
+RealPlayer -up-|> Player
+AIPlayer -up-|> Player
+
 
 @enduml
