@@ -1,10 +1,5 @@
 @startuml class 
-
-abstract Pieces {
-    - print : boolean
-    - name : string 
-}
-
+package "STRATEGO"{
 abstract Units {
     - valeur : Grade
     + deplace() : void
@@ -21,13 +16,18 @@ enum Grade {
     DEMINEUR = 3;
     ECLAIREUR = 2; 
     ESPION = 1; 
-    FLAG;
-    BOMB;
+    FLAG = 0;
+    BOMB = 11;
+
+    - code : int
+    + getCode() : code
+    + 
 }
 
-
 class Fight {
-
+    - fighter1 : Units;
+    - fighter2 : Units;
+    + fighting(fighter1, fighter2) : Units 
 }
 
 class Player {
@@ -35,8 +35,8 @@ class Player {
 }
 
 class Game {
-    - PlayerList[] : Player;
-    + initPlateau(player : Player) : void;
+    - PlayerList[] : Player
+    + initPlateau(player : Player) : void
 }
 
 interface Mode {
@@ -60,14 +60,14 @@ class Cell {
 }
 
 class Grid {
-    - longueur : int
-    - largeur : int 
+    - grid[][] : Cell
+    + Grid()
     + Grid(longueur : int, largeur : int)
-    + update() : void
+    + Grid(grid[][])
+}
 }
 
-Units --> Pieces
-Fight <-- Pieces
+Units <-- Fight
 
 Game <.. Timer
 Game --> Mode
